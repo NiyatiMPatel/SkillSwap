@@ -1,0 +1,159 @@
+SkillSwap/
+│
+├── 📄 README.md                      # Main project documentation
+├── 📄 QUICK_START.md                 # 5-minute setup guide
+├── 📄 ARCHITECTURE.md                # Technical architecture details
+├── 📄 PROJECT_SUMMARY.md             # Complete feature summary
+├── 📄 DIRECTORY_STRUCTURE.txt        # This file
+├── 📄 .gitignore                     # Git ignore rules
+│
+├── 📁 server/                        # Backend Express API
+│   ├── 📄 package.json              # Backend dependencies
+│   ├── 📄 server.js                 # Entry point & Express setup
+│   ├── 📄 .env.example              # Environment variables template
+│   ├── 📄 .gitignore
+│   │
+│   ├── 📁 config/
+│   │   └── 📄 db.js                 # MongoDB connection
+│   │
+│   ├── 📁 models/
+│   │   ├── 📄 User.js               # User schema & methods
+│   │   └── 📄 Skill.js              # Skill schema & methods
+│   │
+│   ├── 📁 controllers/
+│   │   ├── 📄 authController.js     # Sign up, sign in, get user
+│   │   ├── 📄 userController.js     # Profile CRUD operations
+│   │   └── 📄 skillController.js    # Skill CRUD operations
+│   │
+│   ├── 📁 routes/
+│   │   ├── 📄 authRoutes.js         # /api/auth routes
+│   │   ├── 📄 userRoutes.js         # /api/users routes
+│   │   └── 📄 skillRoutes.js        # /api/skills routes
+│   │
+│   └── 📁 middleware/
+│       ├── 📄 auth.js               # JWT verification
+│       └── 📄 errorHandler.js       # Global error handling
+│
+└── 📁 client/                        # Frontend React App
+    ├── 📄 package.json              # Frontend dependencies
+    ├── 📄 vite.config.js            # Vite configuration
+    ├── 📄 tailwind.config.js        # Tailwind CSS config
+    ├── 📄 postcss.config.js         # PostCSS config
+    ├── 📄 index.html                # HTML entry point
+    ├── 📄 .env.example              # Environment variables template
+    ├── 📄 .gitignore
+    ├── 📄 eslintrc.cjs              # ESLint configuration
+    │
+    ├── 📁 public/
+    │   └── 📄 vite.svg              # Vite logo
+    │
+    └── 📁 src/
+        ├── 📄 main.jsx              # React entry point
+        ├── 📄 App.jsx               # Main App component with routing
+        ├── 📄 index.css             # Global Tailwind styles
+        │
+        ├── 📁 api/
+        │   └── 📄 axiosClient.js    # Axios instance with interceptors
+        │
+        ├── 📁 store/
+        │   ├── 📄 store.js          # Redux store configuration
+        │   └── 📁 slices/
+        │       ├── 📄 authSlice.js  # Auth state & thunks
+        │       ├── 📄 skillsSlice.js # Skills state & thunks
+        │       └── 📄 uiSlice.js    # UI state (sidebar, modals)
+        │
+        ├── 📁 components/
+        │   ├── 📄 Header.jsx        # Top navigation bar
+        │   ├── 📄 Sidebar.jsx       # Side navigation (responsive)
+        │   ├── 📄 SkillCard.jsx     # Skill display card
+        │   ├── 📄 LoadingSpinner.jsx # Loading indicator
+        │   ├── 📄 ProtectedRoute.jsx # Auth route wrapper
+        │   └── 📄 EmptyState.jsx    # Empty data placeholder
+        │
+        ├── 📁 pages/
+        │   ├── 📄 Welcome.jsx       # Landing page
+        │   ├── 📄 About.jsx         # About page
+        │   ├── 📄 SignUp.jsx        # Registration page
+        │   ├── 📄 SignIn.jsx        # Login page
+        │   ├── 📄 CreateProfile.jsx # Profile creation
+        │   ├── 📄 SkillBoard.jsx    # Main skill browsing
+        │   ├── 📄 Dashboard.jsx     # User dashboard
+        │   └── 📄 Profile.jsx       # Profile editing
+        │
+        └── 📁 utils/
+            └── 📄 dateUtils.js      # Date formatting utilities
+
+
+═══════════════════════════════════════════════════════════════
+
+📊 PROJECT STATISTICS
+
+Backend Files:
+- Configuration: 1
+- Models: 2
+- Controllers: 3
+- Routes: 3
+- Middleware: 2
+- Total: 12 files
+
+Frontend Files:
+- Pages: 8
+- Components: 6
+- Redux Slices: 3
+- API Layer: 1
+- Utils: 1
+- Config: 5
+- Total: 24 files
+
+Documentation:
+- README.md
+- QUICK_START.md
+- ARCHITECTURE.md
+- PROJECT_SUMMARY.md
+- DIRECTORY_STRUCTURE.txt
+- Total: 5 files
+
+═══════════════════════════════════════════════════════════════
+
+🔑 KEY FILES TO UNDERSTAND
+
+Backend:
+1. server.js - Express server setup and middleware
+2. models/User.js - User data structure and authentication
+3. models/Skill.js - Skill data structure
+4. controllers/ - Business logic for all operations
+5. middleware/auth.js - JWT token verification
+
+Frontend:
+1. App.jsx - Main routing and layout
+2. store/store.js - Redux store configuration
+3. api/axiosClient.js - HTTP client with interceptors
+4. pages/ - All user-facing pages
+5. components/ - Reusable UI components
+
+═══════════════════════════════════════════════════════════════
+
+🔄 DATA FLOW EXAMPLE
+
+User Signs Up:
+1. pages/SignUp.jsx - User fills form
+2. store/slices/authSlice.js - Dispatches signUp thunk
+3. api/axiosClient.js - POST request to /api/auth/signup
+4. server/routes/authRoutes.js - Routes to controller
+5. server/controllers/authController.js - Business logic
+6. server/models/User.js - Creates user in MongoDB
+7. Response back through chain
+8. Redux updates state
+9. Component redirects to /create-profile
+
+═══════════════════════════════════════════════════════════════
+
+📝 NEXT STEPS
+
+1. Copy .env.example to .env in both server/ and client/
+2. Install dependencies: npm install in both folders
+3. Set up MongoDB Atlas and add connection string
+4. Run: npm run dev in both server/ and client/
+5. Open http://localhost:5173
+
+═══════════════════════════════════════════════════════════════
