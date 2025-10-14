@@ -1,4 +1,5 @@
 import Skill from '../models/Skill.js';
+import User from '../models/User.js';
 
 /**
  * @route   GET /api/skills
@@ -202,6 +203,138 @@ export const getMySkills = async (req, res) => {
     console.error('Get my skills error:', error);
     res.status(500).json({
       message: error.message || 'Error fetching skills',
+    });
+  }
+};
+
+/**
+ * @route   GET /api/skills/categories
+ * @desc    Get all unique skill categories from user profiles
+ * @access  Public
+ */
+export const getSkillCategories = async (req, res) => {
+  try {
+    // Get all users with their skills
+    const users = await User.find(
+      {
+        $or: [
+          { skillsToTeach: { $exists: true, $ne: [] } },
+          { skillsToLearn: { $exists: true, $ne: [] } }
+        ]
+      },
+      { skillsToTeach: 1, skillsToLearn: 1 }
+    );
+
+    // Combine all skills into one array and get unique values
+    const allSkills = new Set();
+    
+    users.forEach(user => {
+      if (user.skillsToTeach) {
+        user.skillsToTeach.forEach(skill => allSkills.add(skill));
+      }
+      if (user.skillsToLearn) {
+        user.skillsToLearn.forEach(skill => allSkills.add(skill));
+      }
+    });
+
+    // Convert Set to sorted array
+    const categories = ['all', ...Array.from(allSkills).sort()];
+
+    res.status(200).json({
+      count: categories.length,
+      categories,
+    });
+  } catch (error) {
+    console.error('Get categories error:', error);
+    res.status(500).json({
+      message: error.message || 'Error fetching categories',
+    });
+  }
+};
+
+/**
+ * @route   GET /api/skills/overview
+ * @desc    Get detailed overview of all skills with teacher/learner counts
+ * @access  Public
+ */
+export const getSkillsOverview = async (req, res) => {
+  try {
+    // Get all users with their skills and names
+    const users = await User.find(
+      {
+        $or: [
+          { skillsToTeach: { $exists: true, $ne: [] } },
+          { skillsToLearn: { $exists: true, $ne: [] } }
+        ]
+      },
+      { name: 1, email: 1, skillsToTeach: 1, skillsToLearn: 1 }
+    );
+
+    // Build skill overview map
+    const skillsMap = new Map();
+
+    users.forEach(user => {
+      // Process skills to teach
+      if (user.skillsToTeach) {
+        user.skillsToTeach.forEach(skill => {
+          if (!skillsMap.has(skill)) {
+            skillsMap.set(skill, {
+              name: skill,
+              teachers: [],
+              learners: [],
+              teachersCount: 0,
+              learnersCount: 0,
+            });
+          }
+          const skillData = skillsMap.get(skill);
+          skillData.teachers.push({
+            id: user._id,
+            name: user.name,
+            email: user.email,
+          });
+          skillData.teachersCount++;
+        });
+      }
+
+      // Process skills to learn
+      if (user.skillsToLearn) {
+        user.skillsToLearn.forEach(skill => {
+          if (!skillsMap.has(skill)) {
+            skillsMap.set(skill, {
+              name: skill,
+              teachers: [],
+              learners: [],
+              teachersCount: 0,
+              learnersCount: 0,
+            });
+          }
+          const skillData = skillsMap.get(skill);
+          skillData.learners.push({
+            id: user._id,
+            name: user.name,
+            email: user.email,
+          });
+          skillData.learnersCount++;
+        });
+      }
+    });
+
+    // Convert map to array and sort by total interest (teachers + learners)
+    const skillsOverview = Array.from(skillsMap.values())
+      .sort((a, b) => {
+        const totalA = a.teachersCount + a.learnersCount;
+        const totalB = b.teachersCount + b.learnersCount;
+        return totalB - totalA; // Descending order
+      });
+
+    res.status(200).json({
+      count: skillsOverview.length,
+      skills: skillsOverview,
+    });
+  } catch (error) {
+    console.error('Get skills overview error:', error);
+    res.status(500).json({
+      message: error.message || 'Error fetching skills overview',
     });
   }
 };

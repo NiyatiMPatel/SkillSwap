@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosClient from '../../api/axiosClient';
 import { toast } from 'react-hot-toast';
+import { signIn, signUp, getCurrentUser } from './authSlice';
 
 /**
  * Skills Slice - Manages skill board state
@@ -9,16 +10,42 @@ import { toast } from 'react-hot-toast';
  * - Search and category filtering
  */
 
+// Helper function to load saved skills from localStorage (fallback/cache)
+const loadSavedSkills = () => {
+  try {
+    const saved = localStorage.getItem('savedSkills');
+    return saved ? JSON.parse(saved) : [];
+  } catch (error) {
+    console.error('Error loading saved skills:', error);
+    return [];
+  }
+};
+
+// Helper function to sync with localStorage
+const syncToLocalStorage = (savedSkills) => {
+  try {
+    localStorage.setItem('savedSkills', JSON.stringify(savedSkills));
+  } catch (error) {
+    console.error('Error saving to localStorage:', error);
+  }
+};
+
 const initialState = {
   skills: [],
   mySkills: [],
+  skillsOverview: [], // Overview of all skills with teacher/learner info
+  categories: ['all'], // Dynamic categories from user profiles
   selectedSkill: null,
+  savedSkills: loadSavedSkills(), // Load from localStorage on init
+  searchQuery: '', // Search query for smart search
   filters: {
     category: 'all',
     skillType: 'all',
     search: '',
   },
   loading: false,
+  categoriesLoading: false,
+  overviewLoading: false,
   error: null,
 };
 
@@ -32,7 +59,7 @@ export const fetchSkills = createAsyncThunk(
   async (filters = {}, { rejectWithValue }) => {
     try {
       const params = new URLSearchParams();
-      
+
       if (filters.category && filters.category !== 'all') {
         params.append('category', filters.category);
       }
@@ -42,7 +69,7 @@ export const fetchSkills = createAsyncThunk(
       if (filters.search) {
         params.append('search', filters.search);
       }
-      
+
       const response = await axiosClient.get(`/skills?${params.toString()}`);
       return response.data.skills;
     } catch (error) {
@@ -122,6 +149,58 @@ export const fetchMySkills = createAsyncThunk(
   }
 );
 
+// Fetch Skill Categories
+export const fetchCategories = createAsyncThunk(
+  'skills/fetchCategories',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosClient.get('/skills/categories');
+      return response.data.categories;
+    } catch (error) {
+      return rejectWithValue(error.message || 'Failed to fetch categories');
+    }
+  }
+);
+
+// Fetch Skills Overview
+export const fetchSkillsOverview = createAsyncThunk(
+  'skills/fetchSkillsOverview',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosClient.get('/skills/overview');
+      return response.data.skills;
+    } catch (error) {
+      return rejectWithValue(error.message || 'Failed to fetch skills overview');
+    }
+  }
+);
+
+// Fetch Saved Skills from Backend
+export const fetchSavedSkills = createAsyncThunk(
+  'skills/fetchSavedSkills',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosClient.get('/users/saved-skills');
+      return response.data.savedSkills;
+    } catch (error) {
+      return rejectWithValue(error.message || 'Failed to fetch saved skills');
+    }
+  }
+);
+
+// Toggle Saved Skill (Backend + localStorage sync)
+export const toggleSavedSkillAsync = createAsyncThunk(
+  'skills/toggleSavedSkillAsync',
+  async (skillName, { rejectWithValue }) => {
+    try {
+      const response = await axiosClient.post('/users/saved-skills', { skillName });
+      return response.data.savedSkills;
+    } catch (error) {
+      return rejectWithValue(error.message || 'Failed to save skill');
+    }
+  }
+);
+
 /**
  * Skills Slice
  */
@@ -144,6 +223,31 @@ const skillsSlice = createSlice({
     },
     clearSelectedSkill: (state) => {
       state.selectedSkill = null;
+    },
+    // New reducers for enhanced features
+    setSearchQuery: (state, action) => {
+      state.searchQuery = action.payload;
+    },
+    // Local-only toggle (for offline/fallback)
+    toggleSaveSkill: (state, action) => {
+      const skillName = action.payload;
+      const index = state.savedSkills.indexOf(skillName);
+      if (index > -1) {
+        state.savedSkills.splice(index, 1);
+      } else {
+        state.savedSkills.push(skillName);
+      }
+      syncToLocalStorage(state.savedSkills);
+    },
+    // Placeholder for future session request feature
+    requestSession: (state, action) => {
+      // TODO: Implement session request logic in Phase 2
+      toast.info('Session request feature coming soon!');
+    },
+    // Placeholder for future connect feature
+    connectWithUser: (state, action) => {
+      // TODO: Implement connect/messaging logic in Phase 2
+      toast.info('Messaging feature coming soon!');
     },
   },
   extraReducers: (builder) => {
@@ -245,8 +349,89 @@ const skillsSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       });
+
+    // Fetch Categories
+    builder
+      .addCase(fetchCategories.pending, (state) => {
+        state.categoriesLoading = true;
+      })
+      .addCase(fetchCategories.fulfilled, (state, action) => {
+        state.categoriesLoading = false;
+        state.categories = action.payload;
+      })
+      .addCase(fetchCategories.rejected, (state, action) => {
+        state.categoriesLoading = false;
+        state.error = action.payload;
+      });
+
+    // Fetch Skills Overview
+    builder
+      .addCase(fetchSkillsOverview.pending, (state) => {
+        state.overviewLoading = true;
+      })
+      .addCase(fetchSkillsOverview.fulfilled, (state, action) => {
+        state.overviewLoading = false;
+        state.skillsOverview = action.payload;
+      })
+      .addCase(fetchSkillsOverview.rejected, (state, action) => {
+        state.overviewLoading = false;
+        state.error = action.payload;
+      });
+
+    // Fetch Saved Skills
+    builder
+      .addCase(fetchSavedSkills.fulfilled, (state, action) => {
+        state.savedSkills = action.payload;
+        syncToLocalStorage(action.payload);
+      })
+      .addCase(fetchSavedSkills.rejected, (state, action) => {
+        console.error('Failed to fetch saved skills:', action.payload);
+      });
+
+    // Toggle Saved Skill (Async)
+    builder
+      .addCase(toggleSavedSkillAsync.fulfilled, (state, action) => {
+        state.savedSkills = action.payload;
+        syncToLocalStorage(action.payload);
+        const wasRemoved = state.savedSkills.length < action.payload.length;
+        toast.success(wasRemoved ? 'Skill removed from saved' : 'Skill saved!');
+      })
+      .addCase(toggleSavedSkillAsync.rejected, (state, action) => {
+        toast.error('Failed to save skill. Please try again.');
+        console.error('Toggle saved skill error:', action.payload);
+      });
+
+    // Listen to Auth Actions - Update savedSkills when user logs in/loads
+    builder
+      .addCase(signIn.fulfilled, (state, action) => {
+        if (action.payload.user?.savedSkills) {
+          state.savedSkills = action.payload.user.savedSkills;
+          syncToLocalStorage(action.payload.user.savedSkills);
+        }
+      })
+      .addCase(signUp.fulfilled, (state, action) => {
+        if (action.payload.user?.savedSkills) {
+          state.savedSkills = action.payload.user.savedSkills;
+          syncToLocalStorage(action.payload.user.savedSkills);
+        }
+      })
+      .addCase(getCurrentUser.fulfilled, (state, action) => {
+        if (action.payload?.savedSkills) {
+          state.savedSkills = action.payload.savedSkills;
+          syncToLocalStorage(action.payload.savedSkills);
+        }
+      });
   },
 });
 
-export const { setFilters, clearFilters, clearError, clearSelectedSkill } = skillsSlice.actions;
+export const {
+  setFilters,
+  clearFilters,
+  clearError,
+  clearSelectedSkill,
+  setSearchQuery,
+  toggleSaveSkill,
+  requestSession,
+  connectWithUser,
+} = skillsSlice.actions;
 export default skillsSlice.reducer;

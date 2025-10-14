@@ -6,14 +6,20 @@ A peer-to-peer web application where users exchange skills (e.g., "I'll teach yo
 
 - **User Authentication**: Sign up and sign in with email or mobile number
 - **Profile Management**: Create and update profiles with skills to teach and learn
-- **Skill Board**: Browse, search, and filter available skills
+- **Skill Board**: Browse, search, and filter available skills (protected route)
+- **Saved Skills**: Bookmark skills with MongoDB persistence and cross-device sync
+- **Dynamic Categories**: Auto-generated categories from user profiles
+- **Smart Search**: Multi-field search with debouncing
+- **Enhanced UI**: Skeleton loaders, modals, animations, and 404 page
 - **Responsive Design**: Modern, mobile-friendly UI with Tailwind CSS
 - **Real-time State Management**: Redux Toolkit with persistent auth
 - **Secure API**: JWT-based authentication with protected routes
+- **Form Validation**: Formik & Yup for consistent form handling
 
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **React 18** - UI library
 - **Vite** - Build tool and dev server
 - **Redux Toolkit** - State management
@@ -24,6 +30,7 @@ A peer-to-peer web application where users exchange skills (e.g., "I'll teach yo
 - **React Hot Toast** - Notifications
 
 ### Backend
+
 - **Node.js & Express** - Server framework
 - **MongoDB & Mongoose** - Database
 - **JWT** - Authentication
@@ -61,6 +68,10 @@ SkillSwap/
 │   ├── package.json
 │   └── server.js         # Entry point
 │
+├── DOCUMENTATION.md      # Comprehensive consolidated guide
+├── CHANGELOG.md          # Version history
+├── ARCHITECTURE.md       # Technical architecture
+├── DIRECTORY_STRUCTURE.txt # Project structure
 └── README.md             # This file
 ```
 
@@ -75,17 +86,20 @@ SkillSwap/
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
-   cd "C:\Users\NIYATI PATEL\Documents\Vibe Coding\SkillSwap"
+   cd "SkillSwap"
    ```
 
 2. **Set up the Backend**
+
    ```bash
    cd server
    npm install
    ```
 
 3. **Configure Backend Environment**
+
    - Copy `.env.example` to `.env`
    - Update the following variables:
      ```env
@@ -97,6 +111,7 @@ SkillSwap/
      ```
 
 4. **Set up the Frontend**
+
    ```bash
    cd ../client
    npm install
@@ -112,17 +127,21 @@ SkillSwap/
 ### Running the Application
 
 1. **Start the Backend Server**
+
    ```bash
    cd server
    npm run dev
    ```
+
    Server will run on `http://localhost:5000`
 
 2. **Start the Frontend Dev Server** (in a new terminal)
+
    ```bash
    cd client
    npm run dev
    ```
+
    App will run on `http://localhost:5173`
 
 3. **Open your browser**
@@ -131,16 +150,22 @@ SkillSwap/
 ## 📖 API Endpoints
 
 ### Authentication Routes (`/api/auth`)
+
 - `POST /signup` - Register new user
 - `POST /signin` - Authenticate user
 - `GET /me` - Get current user (protected)
 
 ### User Routes (`/api/users`)
+
 - `GET /profile` - Get user profile (protected)
 - `PUT /profile` - Update user profile (protected)
+- `GET /saved-skills` - Get user's saved skills (protected)
+- `POST /saved-skills` - Toggle save/unsave skill (protected)
 
 ### Skill Routes (`/api/skills`)
+
 - `GET /` - Get all skills (with filters)
+- `GET /categories` - Get dynamic skill categories
 - `GET /:id` - Get single skill
 - `POST /` - Create skill (protected)
 - `PUT /:id` - Update skill (protected)
@@ -149,9 +174,10 @@ SkillSwap/
 
 ## 🔍 Redux DevTools
 
-The app is configured with Redux DevTools in development mode. 
+The app is configured with Redux DevTools in development mode.
 
 **To inspect state:**
+
 1. Install Redux DevTools browser extension
 2. Open browser DevTools
 3. Navigate to Redux tab
@@ -160,12 +186,14 @@ The app is configured with Redux DevTools in development mode.
 ## 🎨 Design System
 
 ### Colors
+
 - **Primary**: Blue tones (#0ea5e9)
 - **Success**: Green tones
 - **Warning**: Yellow/Orange tones
 - **Error**: Red tones
 
 ### Components
+
 - Buttons: `btn-primary`, `btn-secondary`, `btn-ghost`
 - Inputs: `input-field`
 - Cards: `card`
@@ -177,13 +205,16 @@ The app is configured with Redux DevTools in development mode.
 - Protected API routes
 - Request/response interceptors for token management
 - Auto-logout on 401 errors
-- Input validation on client and server
+- Complete data cleanup on logout (localStorage cleared)
+- Input validation on client and server (Formik & Yup)
 - CORS configuration
 - Helmet security headers
+- User data isolation (users can only access their own data)
 
 ## 📱 Responsive Design
 
 The app is fully responsive and optimized for:
+
 - Desktop (1024px+)
 - Tablet (768px - 1023px)
 - Mobile (320px - 767px)
@@ -205,21 +236,34 @@ The app is fully responsive and optimized for:
 ### Common Issues
 
 **MongoDB Connection Error**
+
 - Ensure your MongoDB Atlas IP whitelist includes your current IP
 - Verify connection string is correct in `.env`
 - Check if MongoDB service is running
 
 **Port Already in Use**
+
 - Change PORT in server `.env` file
 - Kill process using the port: `npx kill-port 5000`
 
 **CORS Errors**
+
 - Verify CLIENT_URL in server `.env` matches your frontend URL
 - Check VITE_API_URL in client `.env`
 
 **Redux State Not Persisting**
+
 - Check browser localStorage
 - Clear cache and restart
+
+## 📚 Documentation
+
+For detailed documentation, see:
+
+- **[DOCUMENTATION.md](./DOCUMENTATION.md)** - Comprehensive guide (Quick Start, Setup, Features, Testing)
+- **[CHANGELOG.md](./CHANGELOG.md)** - Version history and updates
+- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Technical architecture details
+- **[DIRECTORY_STRUCTURE.txt](./DIRECTORY_STRUCTURE.txt)** - Project structure overview
 
 ## 📄 License
 

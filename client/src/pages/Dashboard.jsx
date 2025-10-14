@@ -1,11 +1,11 @@
-import { useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchMySkills } from '../store/slices/skillsSlice';
-import LoadingSpinner from '../components/LoadingSpinner';
-import SkillCard from '../components/SkillCard';
-import EmptyState from '../components/EmptyState';
-import { BarChart3, Users, MessageSquare, TrendingUp } from 'lucide-react';
+import { useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchMySkills } from "../store/slices/skillsSlice";
+import LoadingSpinner from "../components/LoadingSpinner";
+import SkillCard from "../components/SkillCard";
+import EmptyState from "../components/EmptyState";
+import { BarChart3, Users, MessageSquare, TrendingUp, Star } from "lucide-react";
 
 /**
  * Dashboard Page
@@ -17,7 +17,7 @@ import { BarChart3, Users, MessageSquare, TrendingUp } from 'lucide-react';
 const Dashboard = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  const { mySkills, loading } = useSelector((state) => state.skills);
+  const { mySkills, savedSkills, loading } = useSelector((state) => state.skills);
 
   useEffect(() => {
     dispatch(fetchMySkills());
@@ -25,28 +25,34 @@ const Dashboard = () => {
 
   const stats = [
     {
-      label: 'My Skills',
+      label: "My Skills",
       value: mySkills.length,
       icon: BarChart3,
-      color: 'bg-blue-100 text-blue-600',
+      color: "bg-blue-100 text-blue-600",
     },
     {
-      label: 'Skills to Teach',
+      label: "Skills to Teach",
       value: user?.skillsToTeach?.length || 0,
       icon: TrendingUp,
-      color: 'bg-green-100 text-green-600',
+      color: "bg-green-100 text-green-600",
     },
     {
-      label: 'Skills to Learn',
+      label: "Skills to Learn",
       value: user?.skillsToLearn?.length || 0,
       icon: Users,
-      color: 'bg-purple-100 text-purple-600',
+      color: "bg-purple-100 text-purple-600",
     },
     {
-      label: 'Messages',
+      label: "Saved Skills",
+      value: savedSkills.length,
+      icon: Star,
+      color: "bg-yellow-100 text-yellow-600",
+    },
+    {
+      label: "Messages",
       value: 0, // TODO Phase 2: Connect with messaging
       icon: MessageSquare,
-      color: 'bg-pink-100 text-pink-600',
+      color: "bg-pink-100 text-pink-600",
     },
   ];
 
@@ -72,9 +78,13 @@ const Dashboard = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-600 mb-1">{stat.label}</p>
-                    <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+                    <p className="text-3xl font-bold text-gray-900">
+                      {stat.value}
+                    </p>
                   </div>
-                  <div className={`w-12 h-12 rounded-lg ${stat.color} flex items-center justify-center`}>
+                  <div
+                    className={`w-12 h-12 rounded-lg ${stat.color} flex items-center justify-center`}
+                  >
                     <Icon className="w-6 h-6" />
                   </div>
                 </div>
@@ -86,8 +96,13 @@ const Dashboard = () => {
         {/* Profile Summary */}
         <div className="card p-6 mb-8">
           <div className="flex items-start justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Profile Summary</h2>
-            <Link to="/profile" className="text-primary-600 hover:text-primary-700 text-sm font-medium">
+            <h2 className="text-xl font-semibold text-gray-900">
+              Profile Summary
+            </h2>
+            <Link
+              to="/profile"
+              className="text-primary-600 hover:text-primary-700 text-sm font-medium"
+            >
               Edit Profile
             </Link>
           </div>
@@ -102,7 +117,9 @@ const Dashboard = () => {
 
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-2">Skills I Can Teach</h3>
+                <h3 className="text-sm font-medium text-gray-700 mb-2">
+                  Skills I Can Teach
+                </h3>
                 <div className="flex flex-wrap gap-2">
                   {user?.skillsToTeach && user.skillsToTeach.length > 0 ? (
                     user.skillsToTeach.map((skill, index) => (
@@ -120,7 +137,9 @@ const Dashboard = () => {
               </div>
 
               <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-2">Skills I Want to Learn</h3>
+                <h3 className="text-sm font-medium text-gray-700 mb-2">
+                  Skills I Want to Learn
+                </h3>
                 <div className="flex flex-wrap gap-2">
                   {user?.skillsToLearn && user.skillsToLearn.length > 0 ? (
                     user.skillsToLearn.map((skill, index) => (
@@ -140,43 +159,6 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* My Skills */}
-        <div className="card p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">My Posted Skills</h2>
-            <Link to="/board" className="btn-primary text-sm">
-              Browse All Skills
-            </Link>
-          </div>
-
-          {loading ? (
-            <LoadingSpinner message="Loading your skills..." />
-          ) : mySkills.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mySkills.map((skill) => (
-                <SkillCard
-                  key={skill._id}
-                  skill={skill}
-                  onClick={() => {
-                    // TODO Phase 2: Open skill detail/edit modal
-                    console.log('Edit skill:', skill);
-                  }}
-                />
-              ))}
-            </div>
-          ) : (
-            <EmptyState
-              title="No skills posted yet"
-              message="Share your skills with the community or post what you want to learn!"
-              action={
-                <Link to="/board" className="btn-primary">
-                  Go to Skill Board
-                </Link>
-              }
-            />
-          )}
-        </div>
-
         {/* Phase 2 Placeholder */}
         <div className="mt-8 p-6 bg-gradient-to-r from-primary-50 to-blue-50 rounded-xl border border-primary-200">
           <h3 className="font-semibold text-primary-900 mb-2 flex items-center gap-2">
@@ -184,8 +166,8 @@ const Dashboard = () => {
             Coming Soon: Messaging & Scheduling
           </h3>
           <p className="text-primary-700 text-sm">
-            Soon you'll be able to message other users directly, schedule skill exchange sessions, 
-            and track your learning progress. Stay tuned!
+            Soon you'll be able to message other users directly, schedule skill
+            exchange sessions, and track your learning progress. Stay tuned!
           </p>
         </div>
       </div>

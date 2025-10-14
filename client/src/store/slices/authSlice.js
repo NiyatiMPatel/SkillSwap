@@ -2,6 +2,17 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosClient from '../../api/axiosClient';
 import { toast } from 'react-hot-toast';
 
+// Helper to sync saved skills to skillsSlice
+const syncSavedSkills = (user) => {
+  if (user?.savedSkills) {
+    try {
+      localStorage.setItem('savedSkills', JSON.stringify(user.savedSkills));
+    } catch (error) {
+      console.error('Error syncing saved skills:', error);
+    }
+  }
+};
+
 /**
  * Auth Slice - Manages authentication state
  * - Sign up, sign in, sign out
@@ -43,6 +54,7 @@ export const signUp = createAsyncThunk(
       // Persist to localStorage
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
+      syncSavedSkills(user);
 
       toast.success('Account created successfully!');
       return { token, user };
@@ -64,13 +76,11 @@ export const signIn = createAsyncThunk(
       // Persist to localStorage
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
+      syncSavedSkills(user);
 
       toast.success('Signed in successfully!');
       return { token, user };
     } catch (error) {
-
-      console.log("🚀 ~ error:", error);
-
       // Don't show toast - let the form display the error
       return rejectWithValue(error.message || 'Sign in failed');
     }
@@ -87,6 +97,7 @@ export const getCurrentUser = createAsyncThunk(
 
       // Update user in localStorage
       localStorage.setItem('user', JSON.stringify(user));
+      syncSavedSkills(user);
 
       return user;
     } catch (error) {
@@ -105,6 +116,7 @@ export const updateProfile = createAsyncThunk(
 
       // Update user in localStorage
       localStorage.setItem('user', JSON.stringify(user));
+      syncSavedSkills(user);
 
       toast.success('Profile updated successfully!');
       return user;
@@ -130,9 +142,7 @@ const authSlice = createSlice({
       state.error = null;
 
       // Clear localStorage
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-
+      localStorage.clear()
       toast.success('Signed out successfully');
     },
     clearError: (state) => {

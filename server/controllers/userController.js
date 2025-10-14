@@ -75,6 +75,7 @@ export const getProfile = async (req, res) => {
         bio: user.bio,
         skillsToTeach: user.skillsToTeach,
         skillsToLearn: user.skillsToLearn,
+        savedSkills: user.savedSkills,
         isProfileComplete: user.isProfileComplete,
       },
     });
@@ -82,6 +83,80 @@ export const getProfile = async (req, res) => {
     console.error('Get profile error:', error);
     res.status(500).json({
       message: error.message || 'Error fetching profile',
+    });
+  }
+};
+
+/**
+ * @route   POST /api/users/saved-skills
+ * @desc    Toggle save skill (add or remove)
+ * @access  Private
+ */
+export const toggleSavedSkill = async (req, res) => {
+  try {
+    const { skillName } = req.body;
+
+    if (!skillName) {
+      return res.status(400).json({
+        message: 'Skill name is required',
+      });
+    }
+
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({
+        message: 'User not found',
+      });
+    }
+
+    // Check if skill is already saved
+    const index = user.savedSkills.indexOf(skillName);
+
+    if (index > -1) {
+      // Remove skill
+      user.savedSkills.splice(index, 1);
+    } else {
+      // Add skill
+      user.savedSkills.push(skillName);
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      message: index > -1 ? 'Skill removed from saved' : 'Skill saved successfully',
+      savedSkills: user.savedSkills,
+    });
+  } catch (error) {
+    console.error('Toggle saved skill error:', error);
+    res.status(500).json({
+      message: error.message || 'Error toggling saved skill',
+    });
+  }
+};
+
+/**
+ * @route   GET /api/users/saved-skills
+ * @desc    Get user's saved skills
+ * @access  Private
+ */
+export const getSavedSkills = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('savedSkills');
+
+    if (!user) {
+      return res.status(404).json({
+        message: 'User not found',
+      });
+    }
+
+    res.status(200).json({
+      savedSkills: user.savedSkills,
+    });
+  } catch (error) {
+    console.error('Get saved skills error:', error);
+    res.status(500).json({
+      message: error.message || 'Error fetching saved skills',
     });
   }
 };

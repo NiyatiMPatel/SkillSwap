@@ -1,9 +1,9 @@
 SkillSwap/
 │
 ├── 📄 README.md                      # Main project documentation
-├── 📄 QUICK_START.md                 # 5-minute setup guide
+├── 📄 DOCUMENTATION.md               # Comprehensive consolidated guide
 ├── 📄 ARCHITECTURE.md                # Technical architecture details
-├── 📄 PROJECT_SUMMARY.md             # Complete feature summary
+├── 📄 CHANGELOG.md                   # Version history and changes
 ├── 📄 DIRECTORY_STRUCTURE.txt        # This file
 ├── 📄 .gitignore                     # Git ignore rules
 │
@@ -65,7 +65,10 @@ SkillSwap/
         ├── 📁 components/
         │   ├── 📄 Header.jsx        # Top navigation bar
         │   ├── 📄 Sidebar.jsx       # Side navigation (responsive)
-        │   ├── 📄 SkillCard.jsx     # Skill display card
+        │   ├── 📄 Footer.jsx        # Footer with copyright
+        │   ├── 📄 SkillOverviewCard.jsx # Enhanced skill card with actions
+        │   ├── 📄 SkillDetailModal.jsx # Skill details modal
+        │   ├── 📄 SkillCardSkeleton.jsx # Loading skeleton
         │   ├── 📄 LoadingSpinner.jsx # Loading indicator
         │   ├── 📄 ProtectedRoute.jsx # Auth route wrapper
         │   └── 📄 EmptyState.jsx    # Empty data placeholder
@@ -76,9 +79,10 @@ SkillSwap/
         │   ├── 📄 SignUp.jsx        # Registration page
         │   ├── 📄 SignIn.jsx        # Login page
         │   ├── 📄 CreateProfile.jsx # Profile creation
-        │   ├── 📄 SkillBoard.jsx    # Main skill browsing
+        │   ├── 📄 SkillBoard.jsx    # Main skill browsing (protected)
         │   ├── 📄 Dashboard.jsx     # User dashboard
-        │   └── 📄 Profile.jsx       # Profile editing
+        │   ├── 📄 Profile.jsx       # Profile editing
+        │   └── 📄 NotFound.jsx      # 404 error page
         │
         └── 📁 utils/
             └── 📄 dateUtils.js      # Date formatting utilities
@@ -97,19 +101,19 @@ Backend Files:
 - Total: 12 files
 
 Frontend Files:
-- Pages: 8
-- Components: 6
+- Pages: 9
+- Components: 9
 - Redux Slices: 3
 - API Layer: 1
 - Utils: 1
 - Config: 5
-- Total: 24 files
+- Total: 28 files
 
 Documentation:
 - README.md
-- QUICK_START.md
+- DOCUMENTATION.md (consolidated guide)
 - ARCHITECTURE.md
-- PROJECT_SUMMARY.md
+- CHANGELOG.md
 - DIRECTORY_STRUCTURE.txt
 - Total: 5 files
 

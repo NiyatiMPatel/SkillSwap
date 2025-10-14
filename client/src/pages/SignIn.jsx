@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { signIn, clearError } from "../store/slices/authSlice";
-import { LogIn } from "lucide-react";
+import { Loader2, LogIn } from "lucide-react";
 
 /**
  * Sign In Page with Formik & Yup Validation
@@ -43,16 +43,12 @@ const SignIn = () => {
     (state) => state.auth
   );
 
-  console.log("🚀 ~ error:", error);
-
   // Get the page they were trying to access
   const from = location.state?.from?.pathname || "/board";
 
   useEffect(() => {
-    // Clear errors only once on initial mount
     dispatch(clearError());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     // Redirect if authenticated
@@ -185,7 +181,9 @@ const SignIn = () => {
                 disabled={isSubmitting || loading}
                 className="btn-primary w-full flex items-center justify-center gap-2"
               >
-                {/* {(isSubmitting || loading) && <Loader2 className="w-4 h-4 animate-spin" />} */}
+                {(isSubmitting || loading) && (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                )}
                 {isSubmitting || loading ? "Signing In..." : "Sign In"}
               </button>
             </Form>

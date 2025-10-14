@@ -41,6 +41,11 @@ const userSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    savedSkills: {
+      type: [String],
+      default: [],
+      description: 'Array of skill names that user has bookmarked',
+    },
     avatar: {
       type: String,
       default: '',

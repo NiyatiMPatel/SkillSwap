@@ -129,6 +129,7 @@ export const signin = async (req, res) => {
         bio: user.bio,
         skillsToTeach: user.skillsToTeach,
         skillsToLearn: user.skillsToLearn,
+        savedSkills: user.savedSkills,
         isProfileComplete: user.isProfileComplete,
       },
     });
@@ -158,6 +159,7 @@ export const getMe = async (req, res) => {
         bio: user.bio,
         skillsToTeach: user.skillsToTeach,
         skillsToLearn: user.skillsToLearn,
+        savedSkills: user.savedSkills,
         isProfileComplete: user.isProfileComplete,
       },
     });
