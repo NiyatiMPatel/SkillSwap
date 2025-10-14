@@ -254,11 +254,16 @@ export const getSkillCategories = async (req, res) => {
 
 /**
  * @route   GET /api/skills/overview
- * @desc    Get detailed overview of all skills with teacher/learner counts
+ * @desc    Get detailed overview of all skills with teacher/learner counts (with pagination)
  * @access  Public
  */
 export const getSkillsOverview = async (req, res) => {
   try {
+    // Get pagination parameters from query
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
     // Get all users with their skills and names
     const users = await User.find(
       {
@@ -320,16 +325,29 @@ export const getSkillsOverview = async (req, res) => {
     });
 
     // Convert map to array and sort by total interest (teachers + learners)
-    const skillsOverview = Array.from(skillsMap.values())
+    const allSkills = Array.from(skillsMap.values())
       .sort((a, b) => {
         const totalA = a.teachersCount + a.learnersCount;
         const totalB = b.teachersCount + b.learnersCount;
         return totalB - totalA; // Descending order
       });
 
+    // Apply pagination
+    const totalSkills = allSkills.length;
+    const totalPages = Math.ceil(totalSkills / limit);
+    const paginatedSkills = allSkills.slice(skip, skip + limit);
+
     res.status(200).json({
-      count: skillsOverview.length,
-      skills: skillsOverview,
+      count: totalSkills,
+      skills: paginatedSkills,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        pageSize: limit,
+        totalItems: totalSkills,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+      },
     });
   } catch (error) {
     console.error('Get skills overview error:', error);

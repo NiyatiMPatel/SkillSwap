@@ -43,6 +43,14 @@ const initialState = {
     skillType: 'all',
     search: '',
   },
+  pagination: {
+    currentPage: 1,
+    totalPages: 1,
+    pageSize: 10,
+    totalItems: 0,
+    hasNextPage: false,
+    hasPrevPage: false,
+  },
   loading: false,
   categoriesLoading: false,
   overviewLoading: false,
@@ -165,10 +173,10 @@ export const fetchCategories = createAsyncThunk(
 // Fetch Skills Overview
 export const fetchSkillsOverview = createAsyncThunk(
   'skills/fetchSkillsOverview',
-  async (_, { rejectWithValue }) => {
+  async ({ page = 1, limit = 10 } = {}, { rejectWithValue }) => {
     try {
-      const response = await axiosClient.get('/skills/overview');
-      return response.data.skills;
+      const response = await axiosClient.get(`/skills/overview?page=${page}&limit=${limit}`);
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.message || 'Failed to fetch skills overview');
     }
@@ -227,6 +235,9 @@ const skillsSlice = createSlice({
     // New reducers for enhanced features
     setSearchQuery: (state, action) => {
       state.searchQuery = action.payload;
+    },
+    setCurrentPage: (state, action) => {
+      state.pagination.currentPage = action.payload;
     },
     // Local-only toggle (for offline/fallback)
     toggleSaveSkill: (state, action) => {
@@ -371,7 +382,8 @@ const skillsSlice = createSlice({
       })
       .addCase(fetchSkillsOverview.fulfilled, (state, action) => {
         state.overviewLoading = false;
-        state.skillsOverview = action.payload;
+        state.skillsOverview = action.payload.skills;
+        state.pagination = action.payload.pagination;
       })
       .addCase(fetchSkillsOverview.rejected, (state, action) => {
         state.overviewLoading = false;
@@ -430,6 +442,7 @@ export const {
   clearError,
   clearSelectedSkill,
   setSearchQuery,
+  setCurrentPage,
   toggleSaveSkill,
   requestSession,
   connectWithUser,

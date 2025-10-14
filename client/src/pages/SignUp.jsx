@@ -1,10 +1,10 @@
-import { useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
-import * as Yup from 'yup';
-import { signUp, clearError } from '../store/slices/authSlice';
-import { UserPlus, Loader2 } from 'lucide-react';
+import { useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import { signUp, clearError } from "../store/slices/authSlice";
+import { UserPlus, Loader2 } from "lucide-react";
 
 /**
  * Sign Up Page with Formik & Yup Validation
@@ -16,36 +16,33 @@ import { UserPlus, Loader2 } from 'lucide-react';
 // Yup validation schema
 const signUpSchema = Yup.object().shape({
   name: Yup.string()
-    .required('Name is required')
-    .min(2, 'Name must be at least 2 characters'),
-  email: Yup.string().email('Invalid email format'),
-  mobile: Yup.string().matches(/^[+]?[\d\s-()]+$/, 'Invalid mobile number format'),
+    .required("Name is required")
+    .min(2, "Name must be at least 2 characters"),
+  email: Yup.string()
+    .email("Invalid email format")
+    .required("Email is required"),
+  mobile: Yup.string()
+    .matches(/^[+]?[\d\s-()]+$/, "Invalid mobile number format")
+    .required("Mobile is required"),
   password: Yup.string()
-    .required('Password is required')
-    .min(6, 'Password must be at least 6 characters'),
+    .required("Password is required")
+    .min(6, "Password must be at least 6 characters"),
   confirmPassword: Yup.string()
-    .required('Please confirm your password')
-    .oneOf([Yup.ref('password')], 'Passwords must match'),
+    .required("Please confirm your password")
+    .oneOf([Yup.ref("password")], "Passwords must match"),
 });
 
-// Custom validation to ensure either email or mobile is provided
-const validateSignUp = (values) => {
-  const errors = {};
-  if (!values.email && !values.mobile) {
-    errors.email = 'Please provide either email or mobile number';
-    errors.mobile = 'Please provide either email or mobile number';
-  }
-  return errors;
-};
 const SignUp = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { loading, error, isAuthenticated, user } = useSelector((state) => state.auth);
+  const { loading, error, isAuthenticated, user } = useSelector(
+    (state) => state.auth
+  );
 
   // Get prefilled data from location state (if redirected from SignIn)
-  const prefilledEmail = location.state?.prefillEmail || '';
-  const prefilledMobile = location.state?.prefillMobile || '';
+  const prefilledEmail = location.state?.prefillEmail || "";
+  const prefilledMobile = location.state?.prefillMobile || "";
 
   useEffect(() => {
     // Clear errors on mount
@@ -56,9 +53,9 @@ const SignUp = () => {
     // Redirect if authenticated
     if (isAuthenticated && user) {
       if (user.isProfileComplete) {
-        navigate('/board');
+        navigate("/board");
       } else {
-        navigate('/create-profile');
+        navigate("/create-profile");
       }
     }
   }, [isAuthenticated, user, navigate]);
@@ -66,8 +63,8 @@ const SignUp = () => {
   const handleFormSubmit = async (values, { setSubmitting }) => {
     const userData = {
       name: values.name,
-      email: values.email || undefined,
-      mobile: values.mobile || undefined,
+      email: values.email,
+      mobile: values.mobile,
       password: values.password,
     };
 
@@ -92,14 +89,13 @@ const SignUp = () => {
         {/* Formik Form */}
         <Formik
           initialValues={{
-            name: '',
+            name: "",
             email: prefilledEmail,
             mobile: prefilledMobile,
-            password: '',
-            confirmPassword: '',
+            password: "",
+            confirmPassword: "",
           }}
           validationSchema={signUpSchema}
-          validate={validateSignUp}
           onSubmit={handleFormSubmit}
         >
           {({ errors, touched, isSubmitting }) => (
@@ -113,7 +109,10 @@ const SignUp = () => {
 
               {/* Name */}
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Full Name *
                 </label>
                 <Field
@@ -121,7 +120,7 @@ const SignUp = () => {
                   name="name"
                   type="text"
                   className={`input-field ${
-                    errors.name && touched.name ? 'border-red-500' : ''
+                    errors.name && touched.name ? "border-red-500" : ""
                   }`}
                   placeholder="John Doe"
                 />
@@ -134,7 +133,10 @@ const SignUp = () => {
 
               {/* Email */}
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Email Address
                 </label>
                 <Field
@@ -142,7 +144,7 @@ const SignUp = () => {
                   name="email"
                   type="email"
                   className={`input-field ${
-                    errors.email && touched.email ? 'border-red-500' : ''
+                    errors.email && touched.email ? "border-red-500" : ""
                   }`}
                   placeholder="john@example.com"
                 />
@@ -155,7 +157,10 @@ const SignUp = () => {
 
               {/* Mobile */}
               <div>
-                <label htmlFor="mobile" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="mobile"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Mobile Number
                 </label>
                 <Field
@@ -163,7 +168,7 @@ const SignUp = () => {
                   name="mobile"
                   type="tel"
                   className={`input-field ${
-                    errors.mobile && touched.mobile ? 'border-red-500' : ''
+                    errors.mobile && touched.mobile ? "border-red-500" : ""
                   }`}
                   placeholder="+1234567890"
                 />
@@ -172,14 +177,14 @@ const SignUp = () => {
                   component="p"
                   className="mt-1 text-sm text-red-600"
                 />
-                <p className="mt-1 text-xs text-gray-500">
-                  Provide either email or mobile number
-                </p>
               </div>
 
               {/* Password */}
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Password *
                 </label>
                 <Field
@@ -187,7 +192,7 @@ const SignUp = () => {
                   name="password"
                   type="password"
                   className={`input-field ${
-                    errors.password && touched.password ? 'border-red-500' : ''
+                    errors.password && touched.password ? "border-red-500" : ""
                   }`}
                   placeholder="••••••••"
                 />
@@ -200,7 +205,10 @@ const SignUp = () => {
 
               {/* Confirm Password */}
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Confirm Password *
                 </label>
                 <Field
@@ -208,7 +216,9 @@ const SignUp = () => {
                   name="confirmPassword"
                   type="password"
                   className={`input-field ${
-                    errors.confirmPassword && touched.confirmPassword ? 'border-red-500' : ''
+                    errors.confirmPassword && touched.confirmPassword
+                      ? "border-red-500"
+                      : ""
                   }`}
                   placeholder="••••••••"
                 />
@@ -225,8 +235,10 @@ const SignUp = () => {
                 disabled={isSubmitting || loading}
                 className="btn-primary w-full flex items-center justify-center gap-2"
               >
-                {(isSubmitting || loading) && <Loader2 className="w-4 h-4 animate-spin" />}
-                {isSubmitting || loading ? 'Creating Account...' : 'Sign Up'}
+                {(isSubmitting || loading) && (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                )}
+                {isSubmitting || loading ? "Creating Account..." : "Sign Up"}
               </button>
             </Form>
           )}
@@ -234,8 +246,11 @@ const SignUp = () => {
 
         {/* Sign in link */}
         <p className="text-center text-sm text-gray-600">
-          Already have an account?{' '}
-          <Link to="/signin" className="text-primary-600 hover:text-primary-700 font-medium">
+          Already have an account?{" "}
+          <Link
+            to="/signin"
+            className="text-primary-600 hover:text-primary-700 font-medium"
+          >
             Sign In
           </Link>
         </p>

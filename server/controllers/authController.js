@@ -20,7 +20,7 @@ export const signup = async (req, res) => {
     const { email, mobile, password, name } = req.body;
 
     // Validation
-    if (!email && !mobile) {
+    if (!email || !mobile) {
       return res.status(400).json({
         message: 'Please provide email or mobile number',
       });
