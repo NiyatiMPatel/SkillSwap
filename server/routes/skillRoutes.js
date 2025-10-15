@@ -13,16 +13,18 @@ import { protect } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Public routes
+// All routes are protected
+router.use(protect);
+
+
 router.get('/', getAllSkills);
 router.get('/categories', getSkillCategories);
 router.get('/overview', getSkillsOverview);
 router.get('/:id', getSkillById);
 
-// Protected routes
-router.post('/', protect, createSkill);
-router.put('/:id', protect, updateSkill);
-router.delete('/:id', protect, deleteSkill);
-router.get('/user/my-skills', protect, getMySkills);
+router.post('/', createSkill);
+router.put('/:id', updateSkill);
+router.delete('/:id', deleteSkill);
+router.get('/user/my-skills', getMySkills);
 
 export default router;

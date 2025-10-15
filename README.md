@@ -82,8 +82,37 @@ SkillSwap/
 - Node.js (v18 or higher)
 - MongoDB Atlas account (or local MongoDB)
 - npm or yarn
+- **OR** Docker & Docker Compose (for containerized setup)
 
-### Installation
+### Option 1: Docker Setup (Recommended) 🐳
+
+The easiest way to run the application is using Docker:
+
+1. **Install Docker & Docker Compose**
+   - [Docker Desktop](https://docs.docker.com/get-docker/) (includes Docker Compose)
+
+2. **Configure Environment**
+   ```bash
+   cp .env.docker .env
+   # Edit .env with your configuration
+   ```
+
+3. **Start All Services**
+   ```bash
+   docker-compose up
+   ```
+
+   This will start:
+   - MongoDB on port 27017
+   - Backend API on port 5000
+   - Frontend on port 3000
+
+4. **Access the Application**
+   - Open http://localhost:3000
+
+**For detailed Docker documentation, see [DOCKER.md](./DOCKER.md)**
+
+### Option 2: Manual Installation
 
 1. **Clone the repository**
 
@@ -260,6 +289,7 @@ The app is fully responsive and optimized for:
 
 For detailed documentation, see:
 
+- **[DOCKER.md](./DOCKER.md)** - Docker setup and deployment guide
 - **[DOCUMENTATION.md](./DOCUMENTATION.md)** - Comprehensive guide (Quick Start, Setup, Features, Testing)
 - **[CHANGELOG.md](./CHANGELOG.md)** - Version history and updates
 - **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Technical architecture details
