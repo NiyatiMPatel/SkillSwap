@@ -1,32 +1,31 @@
-import { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Formik, Form, Field, ErrorMessage, FieldArray } from 'formik';
-import * as Yup from 'yup';
-import { updateProfile } from '../store/slices/authSlice';
-import { User, Plus, X } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Formik, Form, Field, ErrorMessage, FieldArray } from "formik";
+import * as Yup from "yup";
+import { updateProfile } from "../store/slices/authSlice";
+import { User, Plus, X } from "lucide-react";
+import { useNavigate } from "react-router";
 
 // Yup validation schema
 const profileSchema = Yup.object().shape({
   name: Yup.string()
-    .required('Name is required')
-    .min(2, 'Name must be at least 2 characters'),
-  bio: Yup.string()
-    .max(500, 'Bio must be less than 500 characters'),
+    .required("Name is required")
+    .min(2, "Name must be at least 2 characters"),
+  bio: Yup.string().max(500, "Bio must be less than 500 characters"),
   skillsToTeach: Yup.array().of(Yup.string()),
   skillsToLearn: Yup.array().of(Yup.string()),
 });
 
 const Profile = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { user, loading, error } = useSelector((state) => state.auth);
-  const [successMessage, setSuccessMessage] = useState('');
 
   const handleFormSubmit = async (values, { setSubmitting }) => {
     const result = await dispatch(updateProfile(values));
-    
+
     if (updateProfile.fulfilled.match(result)) {
-      setSuccessMessage('Profile updated successfully!');
-      setTimeout(() => setSuccessMessage(''), 3000);
+      navigate("/board", { replace: true });
     }
     setSubmitting(false);
   };
@@ -45,8 +44,8 @@ const Profile = () => {
         <Formik
           enableReinitialize
           initialValues={{
-            name: user?.name || '',
-            bio: user?.bio || '',
+            name: user?.name || "",
+            bio: user?.bio || "",
             skillsToTeach: user?.skillsToTeach || [],
             skillsToLearn: user?.skillsToLearn || [],
           }}
@@ -62,21 +61,16 @@ const Profile = () => {
                 </div>
               )}
 
-              {/* Success message */}
-              {successMessage && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <p className="text-sm text-green-600">{successMessage}</p>
-                </div>
-              )}
-
               {/* Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Full Name *
+                </label>
                 <Field
                   name="name"
                   type="text"
                   className={`input-field ${
-                    errors.name && touched.name ? 'border-red-500' : ''
+                    errors.name && touched.name ? "border-red-500" : ""
                   }`}
                 />
                 <ErrorMessage
@@ -88,13 +82,15 @@ const Profile = () => {
 
               {/* Bio */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Bio</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Bio
+                </label>
                 <Field
                   as="textarea"
                   name="bio"
                   rows="4"
                   className={`input-field resize-none ${
-                    errors.bio && touched.bio ? 'border-red-500' : ''
+                    errors.bio && touched.bio ? "border-red-500" : ""
                   }`}
                   placeholder="Tell us about yourself..."
                 />
@@ -112,7 +108,9 @@ const Profile = () => {
               <FieldArray name="skillsToTeach">
                 {({ push, remove }) => (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Skills I Can Teach</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Skills I Can Teach
+                    </label>
                     <div className="flex gap-2 mb-3">
                       <input
                         type="text"
@@ -120,12 +118,12 @@ const Profile = () => {
                         className="input-field"
                         placeholder="Add a skill..."
                         onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
+                          if (e.key === "Enter") {
                             e.preventDefault();
                             const input = e.target;
                             if (input.value.trim()) {
                               push(input.value.trim());
-                              input.value = '';
+                              input.value = "";
                             }
                           }
                         }}
@@ -133,10 +131,11 @@ const Profile = () => {
                       <button
                         type="button"
                         onClick={() => {
-                          const input = document.getElementById('profileTeachSkill');
+                          const input =
+                            document.getElementById("profileTeachSkill");
                           if (input.value.trim()) {
                             push(input.value.trim());
-                            input.value = '';
+                            input.value = "";
                           }
                         }}
                         className="btn-primary"
@@ -146,7 +145,10 @@ const Profile = () => {
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {values.skillsToTeach.map((skill, index) => (
-                        <span key={index} className="inline-flex items-center gap-2 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">
+                        <span
+                          key={index}
+                          className="inline-flex items-center gap-2 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm"
+                        >
                           {skill}
                           <button type="button" onClick={() => remove(index)}>
                             <X className="w-4 h-4" />
@@ -162,7 +164,9 @@ const Profile = () => {
               <FieldArray name="skillsToLearn">
                 {({ push, remove }) => (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Skills I Want to Learn</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Skills I Want to Learn
+                    </label>
                     <div className="flex gap-2 mb-3">
                       <input
                         type="text"
@@ -170,12 +174,12 @@ const Profile = () => {
                         className="input-field"
                         placeholder="Add a skill..."
                         onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
+                          if (e.key === "Enter") {
                             e.preventDefault();
                             const input = e.target;
                             if (input.value.trim()) {
                               push(input.value.trim());
-                              input.value = '';
+                              input.value = "";
                             }
                           }
                         }}
@@ -183,10 +187,11 @@ const Profile = () => {
                       <button
                         type="button"
                         onClick={() => {
-                          const input = document.getElementById('profileLearnSkill');
+                          const input =
+                            document.getElementById("profileLearnSkill");
                           if (input.value.trim()) {
                             push(input.value.trim());
-                            input.value = '';
+                            input.value = "";
                           }
                         }}
                         className="btn-primary"
@@ -196,7 +201,10 @@ const Profile = () => {
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {values.skillsToLearn.map((skill, index) => (
-                        <span key={index} className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+                        <span
+                          key={index}
+                          className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm"
+                        >
                           {skill}
                           <button type="button" onClick={() => remove(index)}>
                             <X className="w-4 h-4" />
@@ -214,7 +222,7 @@ const Profile = () => {
                 disabled={isSubmitting || loading}
                 className="btn-primary w-full"
               >
-                {isSubmitting || loading ? 'Saving...' : 'Save Changes'}
+                {isSubmitting || loading ? "Saving..." : "Save Changes"}
               </button>
             </Form>
           )}

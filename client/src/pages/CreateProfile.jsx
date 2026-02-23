@@ -1,10 +1,10 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { Formik, Form, Field, ErrorMessage, FieldArray } from 'formik';
-import * as Yup from 'yup';
-import { updateProfile } from '../store/slices/authSlice';
-import { UserCircle, Plus, X } from 'lucide-react';
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { Formik, Form, Field, ErrorMessage, FieldArray } from "formik";
+import * as Yup from "yup";
+import { updateProfile } from "../store/slices/authSlice";
+import { UserCircle, Plus, X } from "lucide-react";
 
 /**
  * Create Profile Page with Formik & Yup Validation
@@ -16,10 +16,9 @@ import { UserCircle, Plus, X } from 'lucide-react';
 // Yup validation schema
 const profileSchema = Yup.object().shape({
   name: Yup.string()
-    .required('Name is required')
-    .min(2, 'Name must be at least 2 characters'),
-  bio: Yup.string()
-    .max(500, 'Bio must be less than 500 characters'),
+    .required("Name is required")
+    .min(2, "Name must be at least 2 characters"),
+  bio: Yup.string().max(500, "Bio must be less than 500 characters"),
   skillsToTeach: Yup.array().of(Yup.string()),
   skillsToLearn: Yup.array().of(Yup.string()),
 });
@@ -28,8 +27,8 @@ const profileSchema = Yup.object().shape({
 const validateProfile = (values) => {
   const errors = {};
   if (values.skillsToTeach.length === 0 && values.skillsToLearn.length === 0) {
-    errors.skillsToTeach = 'Please add at least one skill to teach or learn';
-    errors.skillsToLearn = 'Please add at least one skill to teach or learn';
+    errors.skillsToTeach = "Please add at least one skill to teach or learn";
+    errors.skillsToLearn = "Please add at least one skill to teach or learn";
   }
   return errors;
 };
@@ -41,15 +40,15 @@ const CreateProfile = () => {
   useEffect(() => {
     // If profile is already complete, redirect
     if (user?.isProfileComplete) {
-      navigate('/board');
+      navigate("/board");
     }
   }, [user, navigate]);
 
   const handleFormSubmit = async (values, { setSubmitting }) => {
     const result = await dispatch(updateProfile(values));
-    
+
     if (updateProfile.fulfilled.match(result)) {
-      navigate('/board');
+      navigate("/board", { replace: true });
     }
     setSubmitting(false);
   };
@@ -62,7 +61,9 @@ const CreateProfile = () => {
           <div className="w-16 h-16 bg-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <UserCircle className="w-8 h-8 text-white" />
           </div>
-          <h2 className="text-3xl font-bold text-gray-900">Complete Your Profile</h2>
+          <h2 className="text-3xl font-bold text-gray-900">
+            Complete Your Profile
+          </h2>
           <p className="mt-2 text-gray-600">
             Tell us about yourself and what skills you want to exchange
           </p>
@@ -71,8 +72,8 @@ const CreateProfile = () => {
         {/* Formik Form */}
         <Formik
           initialValues={{
-            name: user?.name || '',
-            bio: user?.bio || '',
+            name: user?.name || "",
+            bio: user?.bio || "",
             skillsToTeach: user?.skillsToTeach || [],
             skillsToLearn: user?.skillsToLearn || [],
           }}
@@ -98,7 +99,10 @@ const CreateProfile = () => {
 
               {/* Name */}
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Full Name *
                 </label>
                 <Field
@@ -106,7 +110,7 @@ const CreateProfile = () => {
                   name="name"
                   type="text"
                   className={`input-field ${
-                    errors.name && touched.name ? 'border-red-500' : ''
+                    errors.name && touched.name ? "border-red-500" : ""
                   }`}
                   placeholder="John Doe"
                 />
@@ -119,7 +123,10 @@ const CreateProfile = () => {
 
               {/* Bio */}
               <div>
-                <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="bio"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Bio
                 </label>
                 <Field
@@ -128,7 +135,7 @@ const CreateProfile = () => {
                   name="bio"
                   rows="4"
                   className={`input-field resize-none ${
-                    errors.bio && touched.bio ? 'border-red-500' : ''
+                    errors.bio && touched.bio ? "border-red-500" : ""
                   }`}
                   placeholder="Tell us about yourself, your interests, and what you're passionate about..."
                 />
@@ -156,12 +163,12 @@ const CreateProfile = () => {
                         className="input-field"
                         placeholder="e.g., React.js, Guitar, Photography"
                         onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
+                          if (e.key === "Enter") {
                             e.preventDefault();
                             const input = e.target;
                             if (input.value.trim()) {
                               push(input.value.trim());
-                              input.value = '';
+                              input.value = "";
                             }
                           }
                         }}
@@ -169,10 +176,11 @@ const CreateProfile = () => {
                       <button
                         type="button"
                         onClick={() => {
-                          const input = document.getElementById('newTeachSkill');
+                          const input =
+                            document.getElementById("newTeachSkill");
                           if (input.value.trim()) {
                             push(input.value.trim());
-                            input.value = '';
+                            input.value = "";
                           }
                         }}
                         className="btn-primary flex items-center gap-2 whitespace-nowrap"
@@ -216,12 +224,12 @@ const CreateProfile = () => {
                         className="input-field"
                         placeholder="e.g., Python, Cooking, Spanish"
                         onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
+                          if (e.key === "Enter") {
                             e.preventDefault();
                             const input = e.target;
                             if (input.value.trim()) {
                               push(input.value.trim());
-                              input.value = '';
+                              input.value = "";
                             }
                           }
                         }}
@@ -229,10 +237,11 @@ const CreateProfile = () => {
                       <button
                         type="button"
                         onClick={() => {
-                          const input = document.getElementById('newLearnSkill');
+                          const input =
+                            document.getElementById("newLearnSkill");
                           if (input.value.trim()) {
                             push(input.value.trim());
-                            input.value = '';
+                            input.value = "";
                           }
                         }}
                         className="btn-primary flex items-center gap-2 whitespace-nowrap"
@@ -266,7 +275,7 @@ const CreateProfile = () => {
               <div className="flex gap-3">
                 <button
                   type="button"
-                  onClick={() => navigate('/board')}
+                  onClick={() => navigate("/board")}
                   className="btn-ghost flex-1"
                 >
                   Skip for Now
@@ -276,7 +285,7 @@ const CreateProfile = () => {
                   disabled={isSubmitting || loading}
                   className="btn-primary flex-1"
                 >
-                  {isSubmitting || loading ? 'Saving...' : 'Complete Profile'}
+                  {isSubmitting || loading ? "Saving..." : "Complete Profile"}
                 </button>
               </div>
             </Form>

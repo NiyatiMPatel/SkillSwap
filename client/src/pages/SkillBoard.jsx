@@ -24,21 +24,25 @@ import { Search, X, ChevronLeft, ChevronRight } from "lucide-react";
  */
 const SkillBoard = () => {
   const dispatch = useDispatch();
-  const { skillsOverview, categories, overviewLoading, searchQuery: globalSearchQuery, pagination } = useSelector(
-    (state) => state.skills
-  );
+  const {
+    skillsOverview,
+    skills,
+    overviewLoading,
+    searchQuery: globalSearchQuery,
+    pagination,
+  } = useSelector((state) => state.skills);
 
   const [localSearchQuery, setLocalSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
-  // Fetch categories only once on mount
+  // Fetch skills only once on mount
   useEffect(() => {
     dispatch(fetchCategories());
   }, [dispatch]);
 
   // Fetch skills overview whenever page changes
   useEffect(() => {
-    dispatch(fetchSkillsOverview({ page: pagination.currentPage, limit: 10 }));
+    dispatch(fetchSkillsOverview({ page: pagination.currentPage, limit: 9 }));
   }, [dispatch, pagination.currentPage]);
 
   // Debounced search - updates Redux state after 300ms of no typing
@@ -55,16 +59,18 @@ const SkillBoard = () => {
     return skillsOverview.filter((skill) => {
       // Search filter - searches skill name and participant names/emails
       const searchLower = globalSearchQuery.toLowerCase();
-      const matchesSearch = 
-        globalSearchQuery === '' ||
+      const matchesSearch =
+        globalSearchQuery === "" ||
         skill.name.toLowerCase().includes(searchLower) ||
-        skill.teachers.some(t => 
-          t.name.toLowerCase().includes(searchLower) ||
-          t.email.toLowerCase().includes(searchLower)
+        skill.teachers.some(
+          (t) =>
+            t.name.toLowerCase().includes(searchLower) ||
+            t.email.toLowerCase().includes(searchLower),
         ) ||
-        skill.learners.some(l => 
-          l.name.toLowerCase().includes(searchLower) ||
-          l.email.toLowerCase().includes(searchLower)
+        skill.learners.some(
+          (l) =>
+            l.name.toLowerCase().includes(searchLower) ||
+            l.email.toLowerCase().includes(searchLower),
         );
 
       // Category filter
@@ -78,7 +84,7 @@ const SkillBoard = () => {
   // Pagination handlers
   const handlePageChange = (newPage) => {
     dispatch(setCurrentPage(newPage));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handlePreviousPage = () => {
@@ -144,14 +150,14 @@ const SkillBoard = () => {
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="input-field"
               >
-                {categories.length > 1 ? (
-                  categories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat === "all" ? "All Categories" : cat}
+                {skills.length > 1 ? (
+                  skills.map((skill) => (
+                    <option key={skill} value={skill}>
+                      {skill === "all" ? "All Skills" : skill}
                     </option>
                   ))
                 ) : (
-                  <option value="all">No categories yet</option>
+                  <option value="all">No skills yet</option>
                 )}
               </select>
             </div>
@@ -193,8 +199,8 @@ const SkillBoard = () => {
                   disabled={!pagination.hasPrevPage}
                   className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${
                     pagination.hasPrevPage
-                      ? 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                      : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      ? "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                      : "bg-gray-100 text-gray-400 cursor-not-allowed"
                   }`}
                   aria-label="Previous page"
                 >
@@ -218,11 +224,15 @@ const SkillBoard = () => {
                           onClick={() => handlePageChange(pageNumber)}
                           className={`w-10 h-10 rounded-lg transition-colors ${
                             pageNumber === pagination.currentPage
-                              ? 'bg-primary-600 text-white font-semibold'
-                              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                              ? "bg-primary-600 text-white font-semibold"
+                              : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
                           }`}
                           aria-label={`Page ${pageNumber}`}
-                          aria-current={pageNumber === pagination.currentPage ? 'page' : undefined}
+                          aria-current={
+                            pageNumber === pagination.currentPage
+                              ? "page"
+                              : undefined
+                          }
                         >
                           {pageNumber}
                         </button>
@@ -247,8 +257,8 @@ const SkillBoard = () => {
                   disabled={!pagination.hasNextPage}
                   className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${
                     pagination.hasNextPage
-                      ? 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                      : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      ? "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                      : "bg-gray-100 text-gray-400 cursor-not-allowed"
                   }`}
                   aria-label="Next page"
                 >
@@ -261,8 +271,13 @@ const SkillBoard = () => {
             {/* Results count */}
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
-                Showing <span className="font-semibold text-primary-600">{filteredSkills.length}</span> of {pagination.totalItems} skill
-                {pagination.totalItems !== 1 ? "s" : ""} (Page {pagination.currentPage} of {pagination.totalPages})
+                Showing{" "}
+                <span className="font-semibold text-primary-600">
+                  {filteredSkills.length}
+                </span>{" "}
+                of {pagination.totalItems} skill
+                {pagination.totalItems !== 1 ? "s" : ""} (Page{" "}
+                {pagination.currentPage} of {pagination.totalPages})
               </p>
               {globalSearchQuery && (
                 <p className="text-xs text-gray-500 mt-1">

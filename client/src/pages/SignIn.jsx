@@ -13,27 +13,13 @@ import { Loader2, LogIn } from "lucide-react";
  * - Can redirect to intended destination after login
  */
 
-// Yup validation schema
+// Yup validation schema (email + password)
 const signInSchema = Yup.object().shape({
-  email: Yup.string().email("Invalid email format"),
-  mobile: Yup.string().matches(
-    /^[+]?[\d\s-()]+$/,
-    "Invalid mobile number format"
-  ),
+  email: Yup.string().email("Invalid email format").required("Email is required"),
   password: Yup.string()
     .required("Password is required")
     .min(6, "Password must be at least 6 characters"),
 });
-
-// Custom validation to ensure either email or mobile is provided
-const validateSignIn = (values) => {
-  const errors = {};
-  if (!values.email && !values.mobile) {
-    errors.email = "Please provide either email or mobile number";
-    errors.mobile = "Please provide either email or mobile number";
-  }
-  return errors;
-};
 
 const SignIn = () => {
   const dispatch = useDispatch();
@@ -59,8 +45,7 @@ const SignIn = () => {
 
   const handleFormSubmit = async (values, { setSubmitting }) => {
     const credentials = {
-      email: values.email || undefined,
-      mobile: values.mobile || undefined,
+      email: values.email,
       password: values.password,
     };
 
@@ -84,11 +69,9 @@ const SignIn = () => {
         <Formik
           initialValues={{
             email: "",
-            mobile: "",
             password: "",
           }}
           validationSchema={signInSchema}
-          validate={validateSignIn}
           onSubmit={handleFormSubmit}
         >
           {({ errors, touched, isSubmitting }) => (
@@ -122,33 +105,6 @@ const SignIn = () => {
                   component="p"
                   className="mt-1 text-sm text-red-600"
                 />
-              </div>
-
-              {/* Mobile */}
-              <div>
-                <label
-                  htmlFor="mobile"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Mobile Number
-                </label>
-                <Field
-                  id="mobile"
-                  name="mobile"
-                  type="tel"
-                  className={`input-field ${
-                    errors.mobile && touched.mobile ? "border-red-500" : ""
-                  }`}
-                  placeholder="+1234567890"
-                />
-                <ErrorMessage
-                  name="mobile"
-                  component="p"
-                  className="mt-1 text-sm text-red-600"
-                />
-                <p className="mt-1 text-xs text-gray-500">
-                  Use either email or mobile number
-                </p>
               </div>
 
               {/* Password */}

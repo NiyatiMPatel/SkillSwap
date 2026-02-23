@@ -37,7 +37,7 @@ const SignUp = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { loading, error, isAuthenticated, user } = useSelector(
-    (state) => state.auth
+    (state) => state.auth,
   );
 
   // Get prefilled data from location state (if redirected from SignIn)
@@ -68,7 +68,22 @@ const SignUp = () => {
       password: values.password,
     };
 
-    await dispatch(signUp(userData));
+    const result = await dispatch(signUp(userData));
+
+    // If user already exists, redirect them to sign in with prefilled email
+    if (signUp.rejected.match(result)) {
+      const message = result.payload || "";
+      if (
+        typeof message === "string" &&
+        message === "User already exists with this email. Please sign in."
+      ) {
+        navigate("/signin", {
+          replace: true,
+          state: { prefillEmail: values.email },
+        });
+      }
+    }
+
     setSubmitting(false);
   };
 

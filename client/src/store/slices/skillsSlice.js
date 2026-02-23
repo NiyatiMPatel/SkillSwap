@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axiosClient from '../../api/axiosClient';
 import { toast } from 'react-hot-toast';
+import { supabase } from '../../lib/supabaseClient';
 import { signIn, signUp, getCurrentUser } from './authSlice';
 
 /**
@@ -34,7 +34,7 @@ const initialState = {
   skills: [],
   mySkills: [],
   skillsOverview: [], // Overview of all skills with teacher/learner info
-  categories: ['all'], // Dynamic categories from user profiles
+  skills: ['all'], // Dynamic skills from user profiles
   selectedSkill: null,
   savedSkills: loadSavedSkills(), // Load from localStorage on init
   searchQuery: '', // Search query for smart search
@@ -61,25 +61,46 @@ const initialState = {
  * Async Thunks
  */
 
+// Map a skills row from Supabase to the shape used in UI
+const mapSkillRow = (row) => {
+  if (!row) return null;
+  return {
+    _id: row.id,
+    title: row.title,
+    description: row.description,
+    category: row.category,
+    skillType: row.skill_type,
+    createdBy: row.created_by,
+    userName: row.creator_name,
+    userEmail: row.creator_email,
+    createdAt: row.created_at,
+  };
+};
+
 // Fetch All Skills
 export const fetchSkills = createAsyncThunk(
   'skills/fetchSkills',
   async (filters = {}, { rejectWithValue }) => {
     try {
-      const params = new URLSearchParams();
+      let query = supabase.from('skills').select('*').order('created_at', { ascending: false });
 
       if (filters.category && filters.category !== 'all') {
-        params.append('category', filters.category);
+        query = query.eq('category', filters.category);
       }
       if (filters.skillType && filters.skillType !== 'all') {
-        params.append('skillType', filters.skillType);
+        query = query.eq('skill_type', filters.skillType);
       }
       if (filters.search) {
-        params.append('search', filters.search);
+        query = query.textSearch('search_vector', filters.search);
       }
 
-      const response = await axiosClient.get(`/skills?${params.toString()}`);
-      return response.data.skills;
+      const { data, error } = await query;
+
+      if (error) {
+        throw error;
+      }
+
+      return (data || []).map(mapSkillRow);
     } catch (error) {
       return rejectWithValue(error.message || 'Failed to fetch skills');
     }
@@ -91,8 +112,17 @@ export const fetchSkillById = createAsyncThunk(
   'skills/fetchSkillById',
   async (skillId, { rejectWithValue }) => {
     try {
-      const response = await axiosClient.get(`/skills/${skillId}`);
-      return response.data.skill;
+      const { data, error } = await supabase
+        .from('skills')
+        .select('*')
+        .eq('id', skillId)
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      return mapSkillRow(data);
     } catch (error) {
       return rejectWithValue(error.message || 'Failed to fetch skill');
     }
@@ -104,9 +134,49 @@ export const createSkill = createAsyncThunk(
   'skills/createSkill',
   async (skillData, { rejectWithValue }) => {
     try {
-      const response = await axiosClient.post('/skills', skillData);
+      const {
+        data: { user: authUser },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      if (authError || !authUser) {
+        return rejectWithValue(authError?.message || 'Not authenticated');
+      }
+
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('name, email')
+        .eq('id', authUser.id)
+        .single();
+
+      if (profileError) {
+        throw profileError;
+      }
+
+      const { title, description, category, skillType } = skillData;
+
+      const { data, error } = await supabase
+        .from('skills')
+        .insert([
+          {
+            title,
+            description,
+            category: category || 'General',
+            skill_type: skillType,
+            created_by: authUser.id,
+            creator_name: profile.name,
+            creator_email: profile.email,
+          },
+        ])
+        .select('*')
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
       toast.success('Skill created successfully!');
-      return response.data.skill;
+      return mapSkillRow(data);
     } catch (error) {
       toast.error(error.message || 'Failed to create skill');
       return rejectWithValue(error.message || 'Failed to create skill');
@@ -119,9 +189,23 @@ export const updateSkill = createAsyncThunk(
   'skills/updateSkill',
   async ({ skillId, skillData }, { rejectWithValue }) => {
     try {
-      const response = await axiosClient.put(`/skills/${skillId}`, skillData);
+      const { data, error } = await supabase
+        .from('skills')
+        .update({
+          title: skillData.title,
+          description: skillData.description,
+          category: skillData.category,
+        })
+        .eq('id', skillId)
+        .select('*')
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
       toast.success('Skill updated successfully!');
-      return response.data.skill;
+      return mapSkillRow(data);
     } catch (error) {
       toast.error(error.message || 'Failed to update skill');
       return rejectWithValue(error.message || 'Failed to update skill');
@@ -134,7 +218,12 @@ export const deleteSkill = createAsyncThunk(
   'skills/deleteSkill',
   async (skillId, { rejectWithValue }) => {
     try {
-      await axiosClient.delete(`/skills/${skillId}`);
+      const { error } = await supabase.from('skills').delete().eq('id', skillId);
+
+      if (error) {
+        throw error;
+      }
+
       toast.success('Skill deleted successfully!');
       return skillId;
     } catch (error) {
@@ -149,8 +238,26 @@ export const fetchMySkills = createAsyncThunk(
   'skills/fetchMySkills',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosClient.get('/skills/user/my-skills');
-      return response.data.skills;
+      const {
+        data: { user: authUser },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      if (authError || !authUser) {
+        return rejectWithValue(authError?.message || 'Not authenticated');
+      }
+
+      const { data, error } = await supabase
+        .from('skills')
+        .select('*')
+        .eq('created_by', authUser.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      return (data || []).map(mapSkillRow);
     } catch (error) {
       return rejectWithValue(error.message || 'Failed to fetch your skills');
     }
@@ -162,10 +269,16 @@ export const fetchCategories = createAsyncThunk(
   'skills/fetchCategories',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosClient.get('/skills/categories');
-      return response.data.categories;
+      const { data, error } = await supabase.rpc('get_skill_categories');
+
+      if (error) {
+        throw error;
+      }
+
+      // data is an array of rows with { category }
+      return (data || []).map((row) => row.category);
     } catch (error) {
-      return rejectWithValue(error.message || 'Failed to fetch categories');
+      return rejectWithValue(error.message || 'Failed to fetch skills');
     }
   }
 );
@@ -175,8 +288,48 @@ export const fetchSkillsOverview = createAsyncThunk(
   'skills/fetchSkillsOverview',
   async ({ page = 1, limit = 10 } = {}, { rejectWithValue }) => {
     try {
-      const response = await axiosClient.get(`/skills/overview?page=${page}&limit=${limit}`);
-      return response.data;
+      const { data, error } = await supabase.rpc('get_skills_overview', {
+        page,
+        page_size: limit,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data || data.length === 0) {
+        return {
+          skills: [],
+          pagination: {
+            currentPage: page,
+            totalPages: 1,
+            pageSize: limit,
+            totalItems: 0,
+            hasNextPage: false,
+            hasPrevPage: false,
+          },
+        };
+      }
+
+      const example = data[0];
+      const pagination = {
+        currentPage: example.current_page,
+        totalPages: example.total_pages,
+        pageSize: example.page_size_out,
+        totalItems: example.total_items,
+        hasNextPage: example.has_next_page,
+        hasPrevPage: example.has_prev_page,
+      };
+
+      const skills = data.map((row) => ({
+        name: row.name,
+        teachers: row.teachers || [],
+        learners: row.learners || [],
+        teachersCount: row.teachers_count,
+        learnersCount: row.learners_count,
+      }));
+
+      return { skills, pagination };
     } catch (error) {
       return rejectWithValue(error.message || 'Failed to fetch skills overview');
     }
@@ -188,8 +341,26 @@ export const fetchSavedSkills = createAsyncThunk(
   'skills/fetchSavedSkills',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosClient.get('/users/saved-skills');
-      return response.data.savedSkills;
+      const {
+        data: { user: authUser },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      if (authError || !authUser) {
+        return rejectWithValue(authError?.message || 'Not authenticated');
+      }
+
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('saved_skills')
+        .eq('id', authUser.id)
+        .single();
+
+      if (profileError) {
+        throw profileError;
+      }
+
+      return profile.saved_skills || [];
     } catch (error) {
       return rejectWithValue(error.message || 'Failed to fetch saved skills');
     }
@@ -201,8 +372,15 @@ export const toggleSavedSkillAsync = createAsyncThunk(
   'skills/toggleSavedSkillAsync',
   async (skillName, { rejectWithValue }) => {
     try {
-      const response = await axiosClient.post('/users/saved-skills', { skillName });
-      return response.data.savedSkills;
+      const { data, error } = await supabase.rpc('toggle_saved_skill', {
+        skill_name: skillName,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      return data || [];
     } catch (error) {
       return rejectWithValue(error.message || 'Failed to save skill');
     }
@@ -368,7 +546,7 @@ const skillsSlice = createSlice({
       })
       .addCase(fetchCategories.fulfilled, (state, action) => {
         state.categoriesLoading = false;
-        state.categories = action.payload;
+        state.skills = action.payload;
       })
       .addCase(fetchCategories.rejected, (state, action) => {
         state.categoriesLoading = false;

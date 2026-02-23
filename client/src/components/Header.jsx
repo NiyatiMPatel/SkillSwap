@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { signOut } from '../store/slices/authSlice';
 import { toggleSidebar } from '../store/slices/uiSlice';
 import { Menu, LogOut, User } from 'lucide-react';
+import { supabase } from '../lib/supabaseClient';
 
 /**
  * Header Component
@@ -15,7 +16,8 @@ const Header = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useSelector((state) => state.auth);
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
     dispatch(signOut());
     navigate('/');
   };
