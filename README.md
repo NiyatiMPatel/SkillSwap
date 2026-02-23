@@ -250,26 +250,26 @@ This enables a scalable skill marketplace view.
 🗂 **Project Structure**
 
 client/
-├── src/
-│ ├── lib/
-│ │ └── supabaseClient.js
-│ ├── store/
-│ │ ├── authSlice.js
-│ │ ├── skillsSlice.js
-│ │ └── uiSlice.js
-│ ├── pages/
-│ │ ├── SignUp.jsx
-│ │ ├── SignIn.jsx
-│ │ ├── CreateProfile.jsx
-│ │ ├── Profile.jsx
-│ │ ├── SkillBoard.jsx
-│ │ └── Dashboard.jsx
-│ └── components/
-│ ├── ProtectedRoute.jsx
-│ ├── Header.jsx
-│ ├── Sidebar.jsx
-│ └── Skill components...
-└── supabase.sql
+ ├── src/
+ │   ├── lib/
+ │   │   └── supabaseClient.js
+ │   ├── store/
+ │   │   ├── authSlice.js
+ │   │   ├── skillsSlice.js
+ │   │   └── uiSlice.js
+ │   ├── pages/
+ │   │   ├── SignUp.jsx
+ │   │   ├── SignIn.jsx
+ │   │   ├── CreateProfile.jsx
+ │   │   ├── Profile.jsx
+ │   │   ├── SkillBoard.jsx
+ │   │   └── Dashboard.jsx
+ │   └── components/
+ │       ├── ProtectedRoute.jsx
+ │       ├── Header.jsx
+ │       ├── Sidebar.jsx
+ │       └── Skill components...
+ └── supabase.sql
 
 ---
 
