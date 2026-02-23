@@ -284,9 +284,9 @@ client/
 
 2. Environment Variables
 
-- Create client/.env:
- - VITE_SUPABASE_URL=your_project_url
- - VITE_SUPABASE_ANON_KEY=your_public_anon_key
+Create client/.env:
+  - VITE_SUPABASE_URL=your_project_url
+  - VITE_SUPABASE_ANON_KEY=your_public_anon_key
 
 Never expose the service role key in the frontend.
 
